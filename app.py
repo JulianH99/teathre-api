@@ -34,6 +34,15 @@ def get_student(code: str):
     return jsonify(student)
 
 
+@app.get('/student/<string:code>/convocations')
+def get_student_convocation_plays(code: str):
+
+    plays = Query(Play.GET_PLAYS_BY_STUDENT_CONVOCATION,
+                  code=code).execute(fetch=FetchMode.ALL)
+
+    return jsonify(plays)
+
+
 def exit_handler():
     Globals.get('connection').close()
 
