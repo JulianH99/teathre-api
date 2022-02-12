@@ -67,7 +67,7 @@ create table convocation(
 );
 
 create table convocation_applicant(
-    convocation_id number generated as identity ,
+    convocation_id number ,
     student_code varchar(12) not null,
     doc_number varchar(11),
     constraint CNVNPLNTPK primary key (convocation_id, student_code, doc_number),
