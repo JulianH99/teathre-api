@@ -17,6 +17,9 @@ app = Flask(__name__)
 
 @app.get('/play')
 def get_plays():
+    """
+    Returns a list of plays
+    """
     plays = Query(Play.GET_ALL_QUERY).execute(fetch=FetchMode.ALL)
 
     return jsonify(plays)
@@ -24,7 +27,12 @@ def get_plays():
 
 @app.get('/student/<string:code>')
 def get_student(code: str):
+    """
+    Returns a student if found by code. Otherwise will return an empty
+    object with a 404 status code
 
+    :param code: code of the student
+    """
     student = Query(Student.GET_BY_CODE, code=code).execute(
         fetch=FetchMode.ONE)
 
@@ -36,6 +44,11 @@ def get_student(code: str):
 
 @app.get('/student/<string:code>/convocations')
 def get_student_convocation_plays(code: str):
+    """
+    Returns a list of plays a given student has applied in a convocation for
+
+    :param code: Code of the student
+    """
 
     plays = Query(Play.GET_PLAYS_BY_STUDENT_CONVOCATION,
                   code=code).execute(fetch=FetchMode.ALL)
