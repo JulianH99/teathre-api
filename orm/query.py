@@ -1,0 +1,33 @@
+
+
+from typing import Any, Dict
+
+from api.orm.globals import Globals
+from api.orm.utils import camel_clase
+from enum import IntEnum, auto
+
+class FetchMode(IntEnum):
+    ALL = auto()
+    ONE = auto()
+
+
+class Query:
+    def __init__(self, query: str, **params) -> None:
+        self.connection = Globals.get('connection').get_connection()
+        self.query = query
+        self.params = params
+
+    def execute(self, fetch=None):
+
+        with self.connection.cursor() as cur:
+            cur.execute(self.query, **self.params)
+            columns = [camel_clase(col[0]) for col in cur.description]
+            cur.rowfactory = lambda *args: dict(zip(columns, args))
+
+            if fetch == FetchMode.ALL:
+                return cur.fetchall()
+
+            elif fetch == FetchMode.ONE:
+                return cur.fetchone()
+
+        Globals.get('connection').release(self.connection)
