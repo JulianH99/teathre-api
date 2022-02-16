@@ -1,5 +1,6 @@
 
 from flask import Flask, jsonify, make_response, request
+from flask_cors import CORS
 from api.entities import Play, Student
 from api.orm.globals import Globals
 from api.orm.connection import Connection
@@ -13,6 +14,7 @@ except Exception as ex:
 
 
 app = Flask(__name__)
+cors = CORS(app)
 
 
 @app.get('/play')
