@@ -1,10 +1,11 @@
 
 from flask import Flask, jsonify, make_response, request
 from flask_cors import CORS
-from .entities import Career, Convocation, ConvocationApplicant, DocumentType, Person, Play, Student
-from .orm.globals import Globals
-from .orm.connection import Connection
-from .orm.query import FetchMode, Query
+from datetime import datetime
+from api.entities import Career, Convocation, ConvocationApplicant, DocumentType, Person, Play, Student
+from api.orm.globals import Globals
+from api.orm.connection import Connection
+from api.orm.query import FetchMode, Query
 import atexit
 
 try:
@@ -30,7 +31,7 @@ def get_plays():
 @app.get('/play/<int:play_id>/convocation/applicants')
 def get_play_applicants(play_id: int):
     """
-    Returns a lis of students that have applied to a certain play
+    Returns a list of students that have applied to a certain play
     """
 
     students = Query(Student.GET_STUDENTS_APPLIED_TO_PLAY,
@@ -135,7 +136,7 @@ def create_student():
             'message': 'Missing fields'
         }), 400)
 
-    if Query(Person.GET_BY_DOC, code=json_data['docNumber']).execute(fetch=FetchMode.ONE):
+    if Query(Person.GET_BY_DOC, doc_number=json_data['docNumber']).execute(fetch=FetchMode.ONE):
         return make_response(jsonify({
             'message': 'There\'s already a person with that document number',
         }), 422)
@@ -148,9 +149,9 @@ def create_student():
     # create person
     Query(Person.SAVE_NEW,
           doc_number=json_data['docNumber'],
-          document_type_id=json_data['document_type_id'],
+          document_type_id=json_data['documentTypeId'],
           names=json_data['names'],
-          last_name=json_data['last_name'],
+          last_name=json_data['lastName'],
           birth_date=json_data['birthDate'],
           email=json_data['email']
           ).execute()

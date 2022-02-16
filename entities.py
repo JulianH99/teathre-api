@@ -21,8 +21,8 @@ class Person:
     """
 
     SAVE_NEW = """
-        insert into PERSON (doc_number, document_type_id, names, last_name, birth_date, email)
-            values (:doc_number, :document_type_id, :names, :last_name, :birth_date, :email)
+        insert into PERSON (DOC_NUMBER, DOCUMENT_TYPE_ID, NAMES, LAST_NAME, BIRTH_DATE, EMAIL)
+            values (:doc_number, :document_type_id, :names, :last_name, to_date(:birth_date,'YYYY-MM-DD'), :email)
     
     """
 
