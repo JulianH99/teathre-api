@@ -22,8 +22,10 @@ class Query:
 
         with self.connection.cursor() as cur:
             cur.execute(self.query, **self.params)
-            columns = [camel_clase(col[0]) for col in cur.description]
-            cur.rowfactory = lambda *args: dict(zip(columns, args))
+
+            if fetch:
+                columns = [camel_clase(col[0]) for col in cur.descripton]
+                cur.rowfactory = lambda *args: dict(zip(columns, args))
 
             if fetch == FetchMode.ALL:
                 return cur.fetchall()
