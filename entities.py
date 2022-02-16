@@ -15,10 +15,41 @@ class Play:
     """
 
 
+class Person:
+    GET_BY_DOC = """
+        select * from PERSON where doc_number = :doc_number
+    """
+
+    SAVE_NEW = """
+        insert into PERSON (doc_number, document_type_id, names, last_name, birth_date, email)
+            values (:doc_number, :document_type_id, :names, :last_name, :birth_date, :email)
+    
+    """
+
+
 class Student:
     GET_BY_CODE = """
         select s.*, p.NAMES, p.LAST_NAME, p.EMAIL, p.BIRTH_DATE, c.NAME as CAREER from STUDENT s
         join PERSON p on s.DOC_NUMBER = p.DOC_NUMBER
         join CAREER c on s.CAREER_ID = c.CAREER_ID
         where CODE = :code
+    """
+
+    CHECK_BY_CODE = """ select * from STUDENT where CODE = :code """
+
+    SAVE_NEW = """
+        insert into STUDENT (doc_number, code, career_id)
+            values (:doc_number, :code, :career_id)
+    """
+
+
+class DocumentType:
+    GET_ALL = """
+        select * from DOCUMENT_TYPE
+    """
+
+
+class Career:
+    GET_ALL = """
+        select * from CAREER
     """
