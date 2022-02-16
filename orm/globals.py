@@ -1,6 +1,3 @@
-
-
-from msilib.schema import Error
 from typing import Any
 
 
@@ -15,5 +12,5 @@ class Globals:
     @classmethod
     def get(cls, attr_name: str):
         if attr_name not in cls._globs:
-            raise Error(f"{attr_name} not found in globals")
+            raise Exception(f"{attr_name} not found in globals")
         return cls._globs[attr_name]

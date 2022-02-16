@@ -1,5 +1,6 @@
 import cx_Oracle
-import api.config as config
+
+import config
 
 
 class Connection:
