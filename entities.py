@@ -27,6 +27,15 @@ class Person:
     """
 
 
+class Convocation:
+    CHECK_BY_PLAY = "select * from CONVOCATION where play_id = :play_id and sysdate between start_date and end_date"
+
+
+class ConvocationApplicant:
+    SAVE_NEW = """insert into CONVOCATION_APPLICANT (convocation_id, student_code, doc_number)
+        values (:convocation_id, :student_code, :doc_number)"""
+
+
 class Student:
     GET_BY_CODE = """
         select s.*, p.NAMES, p.LAST_NAME, p.EMAIL, p.BIRTH_DATE, c.NAME as CAREER from STUDENT s
@@ -40,6 +49,16 @@ class Student:
     SAVE_NEW = """
         insert into STUDENT (doc_number, code, career_id)
             values (:doc_number, :code, :career_id)
+    """
+
+    GET_STUDENTS_APPLIED_TO_PLAY = """
+        select s.code, c2.name as career, p2.* from student s
+        join career c2 on c2.career_id  = s.career_id 
+        join person p2 on p2.doc_number  = s.doc_number 
+        join convocation_applicant ca on s.doc_number = ca.doc_number and ca.student_code = s.code  
+        join convocation c  on ca.convocation_id  = c.id 
+        join play p on c.play_id  = p.play_id 
+        where p.play_id = :play_id
     """
 
 

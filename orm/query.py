@@ -2,9 +2,10 @@
 
 from typing import Any, Dict
 
-from api.orm.globals import Globals
-from api.orm.utils import camel_clase
+from globals import Globals
+from utils import camel_clase
 from enum import IntEnum, auto
+
 
 class FetchMode(IntEnum):
     ALL = auto()

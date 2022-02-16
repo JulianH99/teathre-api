@@ -1,6 +1,6 @@
 
 from flask import Flask, jsonify, make_response, request
-from .entities import Career, DocumentType, Person, Play, Student
+from .entities import Career, Convocation, ConvocationApplicant, DocumentType, Person, Play, Student
 from .orm.globals import Globals
 from .orm.connection import Connection
 from .orm.query import FetchMode, Query
@@ -23,6 +23,55 @@ def get_plays():
     plays = Query(Play.GET_ALL_QUERY).execute(fetch=FetchMode.ALL)
 
     return jsonify(plays)
+
+
+@app.get('/play/<int:play_id>/convocation/applicants')
+def get_play_applicants(play_id: int):
+    """
+    Returns a lis of students that have applied to a certain play
+    """
+
+    students = Query(Student.GET_STUDENTS_APPLIED_TO_PLAY,
+                     play_id=play_id).execute(fetch=FetchMode.ALL)
+
+    return jsonify(students)
+
+
+@app.post('/play/<int:play_id>/convocation')
+def create_convocation_for_play(play_id: int):
+    json_data = request.json
+
+    if not json_data['code']:
+        return make_response(jsonify({
+            'message': 'No student code provided'
+        }), 400)
+
+    student = Query(Student.CHECK_BY_CODE, code=json_data['code']).execute(
+        fetch=FetchMode.ONE)
+
+    if not student:
+        return make_response(jsonify({
+            'message': 'There\'s not an student with that code'
+        }), 404)
+
+    convocation = Query(Convocation.CHECK_BY_PLAY,
+                        play_id=play_id).execute(fetch=FetchMode.ONE)
+
+    if not convocation:
+        return make_response(jsonify({
+            'message': 'The current play does not have any convocations'
+        }), 400)
+
+    # create convocation applicant
+    Query(ConvocationApplicant.SAVE_NEW,
+          convocation_id=convocation['id'],
+          student_code=student['code'],
+          doc_number=student['doc_number']
+          ).execute()
+
+    return make_response(jsonify({
+        'message': 'Convocation successfuly applied'
+    }), 201)
 
 
 @app.get('/student/<string:code>')
