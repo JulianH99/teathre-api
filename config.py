@@ -5,7 +5,7 @@ DB_PORT = 1521
 DB_ENCODING = 'UTF-8'
 
 
-MAIL_PASS = 'iuudwhouwyrbsgwc'
-MAIL_USER = 'juliancorredor99@gmail.com'
+MAIL_PASS = ''
+MAIL_USER = ''
 MAIL_HOST = 'smtp.gmail.com'
 MAIL_PORT = 587
