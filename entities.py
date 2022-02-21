@@ -6,11 +6,12 @@ class Play:
     """
 
     GET_PLAYS_BY_STUDENT_CONVOCATION = """
-        select p.*, pt.NAME as play_type, co.NAME as country from PLAY p
+        select p.*, pt.NAME as play_type, co.NAME as country, pc.NAME, pc.name as character, ca.AUDITION_DATE  from PLAY p
         join COUNTRY co on co.CODE = p.COUNTRY_CODE
         join PLAY_TYPE pt on pt.PLAY_TYPE_ID = p.PLAY_TYPE_ID
         join CONVOCATION c on c.PLAY_ID = p.PLAY_ID
         join CONVOCATION_APPLICANT ca on ca.CONVOCATION_ID = c.ID
+        join PLAY_CHARACTER pc on pc.PLAY_CHARACTER_ID = ca.CHARACTER_ID
         where ca.STUDENT_CODE = :code
     """
 
