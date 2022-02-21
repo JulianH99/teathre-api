@@ -7,7 +7,7 @@ from jinja2 import Template
 
 from .mail import send_mail
 
-from .entities import (Career, Character, Convocation, ConvocationApplicant,
+from .entities import (Career, Character, Convocation, ConvocationApplicant, ConvocationDates,
                        DocumentType, Person, Play, Student)
 from .orm.connection import Connection
 from .orm.globals import Globals
@@ -114,7 +114,6 @@ def create_convocation_for_play(play_id: int):
 
     with open('./templates/play_application.html', 'r') as template:
         subject = 'Te has inscrito a la obra %s' % play['title']
-        print(template)
         tm = Template(template.read())
         tm_render = tm.render(subject=subject, names=student['names'], play_name=play['title'],
                               character_name=character['name'], audition_date=json_data['date'])
@@ -180,7 +179,7 @@ def create_student():
 
     if not json_data['docNumber'] or not json_data['documentTypeId'] or not json_data['names'] \
             or not json_data['lastName'] or not json_data['birthDate'] or not json_data['email'] \
-    or not json_data['code'] or not json_data['careerId']:
+        or not json_data['code'] or not json_data['careerId']:
         return make_response(jsonify({
             'message': 'Missing fields'
         }), 400)
@@ -215,6 +214,17 @@ def create_student():
         fetch=FetchMode.ONE)
 
     return make_response(jsonify(student), 201)
+
+
+@app.get('/convocation/<int:convocation_id>/dates')
+def get_convocation_dates(convocation_id: int):
+    dates = Query(ConvocationDates.GET_BY_CONVOCATION,
+                  id=convocation_id).execute(fetch=FetchMode.ALL)
+    dates = [date['availableDate'].isoformat() for date in dates]
+    dates = [date[:date.find('T')] for date in dates]
+    print(dates)
+
+    return jsonify(dates)
 
 
 def exit_handler():

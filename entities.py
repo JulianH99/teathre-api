@@ -51,6 +51,10 @@ class ConvocationApplicant:
         and character_id = :character"""
 
 
+class ConvocationDates:
+    GET_BY_CONVOCATION = """select available_date from convocation_dates where convocation_id = :id"""
+
+
 class Student:
     GET_BY_CODE = """
         select s.*, p.NAMES, p.LAST_NAME, p.EMAIL, p.BIRTH_DATE, c.NAME as CAREER from STUDENT s

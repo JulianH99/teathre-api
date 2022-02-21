@@ -87,3 +87,10 @@ create table convocation_applicant(
 );
 
 
+CREATE TABLE convocation_dates (
+	convocation_date_id NUMBER GENERATED AS IDENTITY,
+	convocation_id NUMBER,
+	available_date DATE,
+	CONSTRAINT CNVDTPK PRIMARY KEY (convocation_date_id),
+	CONSTRAINT CNVFK1 FOREIGN KEY (convocation_id) REFERENCES convocation(id)
+);
