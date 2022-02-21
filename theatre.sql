@@ -56,6 +56,14 @@ create table play(
     constraint CNTRFK  foreign key (country_code) references country(code)
 );
 
+create table play_character(
+    play_character_id number generated as identity,
+    play_id number not null,
+    name varchar(100),
+    constraint PLCHPK primary key(play_character_id),
+    constraint PLFK foreign key(play_id) references play(play_id)
+);
+
 
 create table convocation(
     id number generated as identity ,
@@ -70,8 +78,12 @@ create table convocation_applicant(
     convocation_id number ,
     student_code varchar(12) not null,
     doc_number varchar(11),
-    constraint CNVNPLNTPK primary key (convocation_id, student_code, doc_number),
+    audition_date date not null,
+    character_id NUMBER,
+    constraint CNVNPLNTPK primary key (convocation_id, student_code, doc_number, character_id),
     constraint STFK foreign key (student_code, doc_number) references student(code, doc_number),
-    constraint CNVFK foreign key (convocation_id) references convocation(id)
+    constraint CNVFK foreign key (convocation_id) references convocation(id),
+    constraint CHFK foreign key (character_id) references play_character(play_character_id)
 );
+
 

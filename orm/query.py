@@ -1,9 +1,5 @@
-
-
-from typing import Any, Dict
-
-from globals import Globals
-from utils import camel_clase
+from .globals import Globals
+from .utils import camel_clase
 from enum import IntEnum, auto
 
 
@@ -24,7 +20,7 @@ class Query:
             cur.execute(self.query, **self.params)
 
             if fetch:
-                columns = [camel_clase(col[0]) for col in cur.descripton]
+                columns = [camel_clase(col[0]) for col in cur.description]
                 cur.rowfactory = lambda *args: dict(zip(columns, args))
 
             if fetch == FetchMode.ALL:
@@ -33,4 +29,6 @@ class Query:
             elif fetch == FetchMode.ONE:
                 return cur.fetchone()
 
-        Globals.get('connection').release(self.connection)
+        self.connection.commit()
+
+        Globals.get('connection').release_connection(self.connection)

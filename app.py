@@ -2,18 +2,19 @@
 from flask import Flask, jsonify, make_response, request
 from flask_cors import CORS
 from datetime import datetime
-from api.entities import Career, Convocation, ConvocationApplicant, DocumentType, Person, Play, Student
-from api.orm.globals import Globals
-from api.orm.connection import Connection
-from api.orm.query import FetchMode, Query
+from .entities import Career, Characters, Convocation, ConvocationApplicant, DocumentType, Person, Play, Student
+from .orm.globals import Globals
+from .orm.connection import Connection
+from .orm.query import FetchMode, Query
 import atexit
-
 try:
+    print("Connecting to db")
     Globals.set('connection', Connection())
 except Exception as ex:
     print(f"Could not connect to database\nCause: {ex}")
 
 
+print("App ready")
 app = Flask(__name__)
 cors = CORS(app)
 
@@ -38,6 +39,22 @@ def get_play_applicants(play_id: int):
                      play_id=play_id).execute(fetch=FetchMode.ALL)
 
     return jsonify(students)
+
+
+@app.get('/play/<int:play_id>/convocation')
+def get_convocation(play_id: int):
+    convocation = Query(Convocation.CHECK_BY_PLAY,
+                        play_id=play_id).execute(fetch=FetchMode.ONE)
+
+    return jsonify(convocation)
+
+
+@app.get('/play/<int:play_id>/characters')
+def get_characters(play_id: int):
+    characters = Query(Characters.GET_CHARACTERS,
+                       play_id=play_id).execute(fetch=FetchMode.ALL)
+
+    return jsonify(characters)
 
 
 @app.post('/play/<int:play_id>/convocation')
@@ -65,11 +82,24 @@ def create_convocation_for_play(play_id: int):
             'message': 'The current play does not have any convocations'
         }), 400)
 
+    if Query(
+        ConvocationApplicant.GET_APPLICATION,
+        doc_number=student['docNumber'],
+            student_code=student['code'],
+            convocation=convocation['id'],
+            character=json_data['character']
+    ).execute(fetch=FetchMode.ONE):
+        return make_response(jsonify({
+            'message': 'You have already an application for this play'
+        }), 400)
+
     # create convocation applicant
     Query(ConvocationApplicant.SAVE_NEW,
           convocation_id=convocation['id'],
           student_code=student['code'],
-          doc_number=student['doc_number']
+          doc_number=student['docNumber'],
+          character_id=json_data['character'],
+          audition_date=json_data['date']
           ).execute()
 
     return make_response(jsonify({
@@ -131,7 +161,7 @@ def create_student():
 
     if not json_data['docNumber'] or not json_data['documentTypeId'] or not json_data['names'] \
             or not json_data['lastName'] or not json_data['birthDate'] or not json_data['email'] \
-    or not json_data['code'] or not json_data['careerId']:
+        or not json_data['code'] or not json_data['careerId']:
         return make_response(jsonify({
             'message': 'Missing fields'
         }), 400)
@@ -162,9 +192,10 @@ def create_student():
           career_id=json_data['careerId']
           ).execute()
 
-    return make_response(jsonify({
-        'message': 'student created'
-    }), 201)
+    student = Query(Student.GET_BY_CODE, code=json_data['code']).execute(
+        fetch=FetchMode.ONE)
+
+    return make_response(jsonify(student), 201)
 
 
 def exit_handler():

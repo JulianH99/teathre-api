@@ -15,6 +15,10 @@ class Play:
     """
 
 
+class Characters:
+    GET_CHARACTERS = """select * from play_character where play_id = :play_id"""
+
+
 class Person:
     GET_BY_DOC = """
         select * from PERSON where doc_number = :doc_number
@@ -32,8 +36,14 @@ class Convocation:
 
 
 class ConvocationApplicant:
-    SAVE_NEW = """insert into CONVOCATION_APPLICANT (convocation_id, student_code, doc_number)
-        values (:convocation_id, :student_code, :doc_number)"""
+    SAVE_NEW = """insert into CONVOCATION_APPLICANT (convocation_id, student_code, doc_number, character_id, audition_date)
+        values (:convocation_id, :student_code, :doc_number, :character_id, TO_DATE(:audition_date, 'YYYY-MM-DD'))"""
+
+    GET_APPLICATION = """select * from convocation_applicant where 
+        doc_number = :doc_number 
+        and student_code = :student_code 
+        and convocation_id = :convocation
+        and character_id = :character"""
 
 
 class Student:
