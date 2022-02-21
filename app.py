@@ -1,12 +1,18 @@
 
+import atexit
+
 from flask import Flask, jsonify, make_response, request
 from flask_cors import CORS
-from datetime import datetime
-from .entities import Career, Characters, Convocation, ConvocationApplicant, DocumentType, Person, Play, Student
-from .orm.globals import Globals
+from jinja2 import Template
+
+from .mail import send_mail
+
+from .entities import (Career, Character, Convocation, ConvocationApplicant,
+                       DocumentType, Person, Play, Student)
 from .orm.connection import Connection
+from .orm.globals import Globals
 from .orm.query import FetchMode, Query
-import atexit
+
 try:
     print("Connecting to db")
     Globals.set('connection', Connection())
@@ -51,7 +57,7 @@ def get_convocation(play_id: int):
 
 @app.get('/play/<int:play_id>/characters')
 def get_characters(play_id: int):
-    characters = Query(Characters.GET_CHARACTERS,
+    characters = Query(Character.GET_CHARACTERS,
                        play_id=play_id).execute(fetch=FetchMode.ALL)
 
     return jsonify(characters)
@@ -66,7 +72,7 @@ def create_convocation_for_play(play_id: int):
             'message': 'No student code provided'
         }), 400)
 
-    student = Query(Student.CHECK_BY_CODE, code=json_data['code']).execute(
+    student = Query(Student.GET_BY_CODE, code=json_data['code']).execute(
         fetch=FetchMode.ONE)
 
     if not student:
@@ -101,6 +107,19 @@ def create_convocation_for_play(play_id: int):
           character_id=json_data['character'],
           audition_date=json_data['date']
           ).execute()
+
+    character = Query(Character.GET_BY_ID, id=json_data['character']).execute(
+        fetch=FetchMode.ONE)
+    play = Query(Play.GET_BY_ID, id=play_id).execute(fetch=FetchMode.ONE)
+
+    with open('./templates/play_application.html', 'r') as template:
+        subject = 'Te has inscrito a la obra %s' % play['title']
+        print(template)
+        tm = Template(template.read())
+        tm_render = tm.render(subject=subject, names=student['names'], play_name=play['title'],
+                              character_name=character['name'], audition_date=json_data['date'])
+
+        send_mail(student['email'], subject, tm_render)
 
     return make_response(jsonify({
         'message': 'Convocation successfuly applied'
@@ -161,7 +180,7 @@ def create_student():
 
     if not json_data['docNumber'] or not json_data['documentTypeId'] or not json_data['names'] \
             or not json_data['lastName'] or not json_data['birthDate'] or not json_data['email'] \
-        or not json_data['code'] or not json_data['careerId']:
+    or not json_data['code'] or not json_data['careerId']:
         return make_response(jsonify({
             'message': 'Missing fields'
         }), 400)

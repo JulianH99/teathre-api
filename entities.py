@@ -14,9 +14,14 @@ class Play:
         where ca.STUDENT_CODE = :code
     """
 
+    GET_BY_ID = """
+        select * from play where play_id = :id
+    """
 
-class Characters:
+
+class Character:
     GET_CHARACTERS = """select * from play_character where play_id = :play_id"""
+    GET_BY_ID = """select name from play_character where play_character_id = :id"""
 
 
 class Person:
