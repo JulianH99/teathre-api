@@ -1,0 +1,11 @@
+DB_USER = ''
+DB_PASS = ''
+DB_HOST = ''
+DB_PORT = 1521
+DB_ENCODING = 'UTF-8'
+
+
+MAIL_PASS = ''
+MAIL_USER = ''
+MAIL_HOST = ''
+MAIL_PORT = 0
