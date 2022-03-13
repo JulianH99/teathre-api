@@ -19,6 +19,16 @@ class Play:
         select * from play where play_id = :id
     """
 
+    GET_ACTIVE_PLAY_BY_TEACHER = """
+        select P.TITLE, P.PLAY_DATE, PA.PLAY_EVENT_ID from EMPLOYEE
+        join PLAY_PARTICIPANT PP on EMPLOYEE.EMPLOYEE_ID = PP.EMPLOYEE_ID and EMPLOYEE.UNIT_ID = PP.UNIT_ID
+        join PLAY_ACTIVITY PA on PP.PARTICIPANT_ID = PA.PARTICIPANT_ID and PP.EMPLOYEE_ID = PA.EMPLOYEE_ID and PP.UNIT_ID = PA.UNIT_ID
+        join PLAY P on PA.PLAY_ID = P.PLAY_ID
+        join PLAY_EVENT PE on P.PLAY_ID = PE.PLAY_ID
+        where PE.START_TIME < trunc(sysdate) and PE.END_TIME > trunc(sysdate) and  PE."date" = sysdate
+            and EMPLOYEE.EMPLOYEE_ID = :employee_id
+    """
+
 
 class Character:
     GET_CHARACTERS = """select * from play_character where play_id = :play_id"""
@@ -81,6 +91,14 @@ class Student:
         where p.play_id = :play_id
     """
 
+    GET_STUDENTS_BY_PLAY = """
+        select STUDENT.CODE, STUDENT.NAMES, STUDENT.LAST_NAMES, PC.NAME as CHARACTER from STUDENT
+        join STUDENT_CHARACTER on STUDENT.CODE = STUDENT_CHARACTER.STUDENT_CODE
+        join PLAY_CHARACTER PC on STUDENT_CHARACTER.CHARACTER_ID = PC.ID and STUDENT_CHARACTER.PLAY_ID = PC.PLAY_ID
+        join PLAY P on PC.PLAY_ID = P.PLAY_ID
+        where P.PLAY_ID = :play_id
+    """
+
 
 class DocumentType:
     GET_ALL = """
@@ -92,3 +110,8 @@ class Career:
     GET_ALL = """
         select * from CAREER
     """
+
+
+class StudentAssistance:
+    SAVE_NEW_ASSISTANCE = """INSERT INTO STUDENT_ASSISTANCE(PLAY_EVENT_ID, PLAY_ID, STUDENT_CODE)
+        VALUES (:play_event_id, :play_id, :student_code)"""
