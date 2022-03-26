@@ -18,15 +18,18 @@ class Play:
     GET_BY_ID = """
         select * from play where play_id = :id
     """
-
     GET_ACTIVE_PLAY_BY_TEACHER = """
-        select P.TITLE, P.PLAY_DATE, PA.PLAY_EVENT_ID from EMPLOYEE
-        join PLAY_PARTICIPANT PP on EMPLOYEE.EMPLOYEE_ID = PP.EMPLOYEE_ID and EMPLOYEE.UNIT_ID = PP.UNIT_ID
-        join PLAY_ACTIVITY PA on PP.PARTICIPANT_ID = PA.PARTICIPANT_ID and PP.EMPLOYEE_ID = PA.EMPLOYEE_ID and PP.UNIT_ID = PA.UNIT_ID
-        join PLAY P on PA.PLAY_ID = P.PLAY_ID
-        join PLAY_EVENT PE on P.PLAY_ID = PE.PLAY_ID
-        where PE.START_TIME < trunc(sysdate) and PE.END_TIME > trunc(sysdate) and  PE."date" = sysdate
-            and EMPLOYEE.EMPLOYEE_ID = :employee_id
+        select P.PLAY_ID, P.TITLE, P.PLAY_DATE, PA.PLAY_EVENT_ID, PE.START_TIME, PE.END_TIME
+        from EMPLOYEE
+                join PLAY_PARTICIPANT PP on EMPLOYEE.EMPLOYEE_ID = PP.EMPLOYEE_ID and EMPLOYEE.UNIT_ID = PP.UNIT_ID
+                join PLAY_ACTIVITY PA
+                    on PP.PARTICIPANT_ID = PA.PARTICIPANT_ID and PP.EMPLOYEE_ID = PA.EMPLOYEE_ID and PP.UNIT_ID = PA.UNIT_ID
+                join PLAY P on PA.PLAY_ID = P.PLAY_ID
+                join PLAY_EVENT PE on P.PLAY_ID = PE.PLAY_ID
+        where TO_CHAR(PE.START_TIME, 'HH24:MI:SS') <= TO_CHAR(sysdate, 'HH24:MI:SS')
+        and TO_CHAR(PE.END_TIME, 'HH24:MI:SS') >= TO_CHAR(sysdate, 'HH24:MI:SS')
+        and TO_CHAR(PE."date", 'YYYY-MM-DD') = TO_CHAR(sysdate, 'YYYY-MM-DD')
+        and EMPLOYEE.EMPLOYEE_ID = :employee_id
     """
 
 
@@ -99,6 +102,18 @@ class Student:
         where P.PLAY_ID = :play_id
     """
 
+    GET_STUDENTS_BY_PLAY_ASSISTANCE = """
+        select STUDENT.CODE, STUDENT.NAMES, STUDENT.LAST_NAMES, PC.NAME as CHARACTER, count(SA.PLAY_ID) ASSISTANCE from STUDENT
+        join STUDENT_CHARACTER on STUDENT.CODE = STUDENT_CHARACTER.STUDENT_CODE
+        join PLAY_CHARACTER PC on STUDENT_CHARACTER.CHARACTER_ID = PC.ID and STUDENT_CHARACTER.PLAY_ID = PC.PLAY_ID
+        join PLAY P on PC.PLAY_ID = P.PLAY_ID
+        join PLAY_EVENT PE on PE.PLAY_ID = P.PLAY_ID
+        left join STUDENT_ASISTANCE SA on STUDENT.CODE = SA.STUDENT_CODE and SA.PLAY_ID = P.PLAY_ID and SA.PLAY_EVENT_ID = PE.PLAY_EVENT_ID
+        where P.PLAY_ID = :play_id and PE.PLAY_EVENT_ID = :play_event_id
+        group by STUDENT.CODE, STUDENT.NAMES, STUDENT.LAST_NAMES, PC.NAME
+
+    """
+
 
 class DocumentType:
     GET_ALL = """
@@ -113,5 +128,10 @@ class Career:
 
 
 class StudentAssistance:
-    SAVE_NEW_ASSISTANCE = """INSERT INTO STUDENT_ASSISTANCE(PLAY_EVENT_ID, PLAY_ID, STUDENT_CODE)
+    SAVE_NEW_ASSISTANCE = """INSERT INTO STUDENT_ASISTANCE(PLAY_EVENT_ID, PLAY_ID, STUDENT_CODE)
         VALUES (:play_event_id, :play_id, :student_code)"""
+
+    GET_ASSISTANCE = """
+        Select STUDENT_ASISTANCE_ID from STUDENT_ASISTANCE WHERE STUDENT_CODE = :student_code
+        and PLAY_EVENT_ID = :play_event_id and PLAY_ID = :play_id
+    """

@@ -4,10 +4,8 @@ from functools import wraps
 
 from flask import Flask, jsonify, make_response, request
 from flask_cors import CORS
-from itsdangerous import json
-from jinja2 import Template
 
-from .mail import send_mail
+# from .mail import send_mail
 
 from .entities import (Career, Character, Convocation, ConvocationApplicant, ConvocationDates,
                        DocumentType, Person, Play, Student, StudentAssistance)
@@ -55,10 +53,11 @@ def get_enabled_asistance_tab():
     return jsonify({"active": True, "play": active_play})
 
 
-@app.get('/play/<int:play_id>/students')
+@app.get('/play/<int:play_id>/event/<int:play_event_id>/students')
 @has_teacher_id_header
-def get_play_students(play_id: int):
-    students = Query(Student.GET_STUDENTS_BY_PLAY,
+def get_play_students(play_id: int, play_event_id: int):
+    students = Query(Student.GET_STUDENTS_BY_PLAY_ASSISTANCE,
+                     play_event_id=play_event_id,
                      play_id=play_id).execute(fetch=FetchMode.ALL)
 
     return jsonify(students)
@@ -70,8 +69,12 @@ def save_students_assistance_to_play(play_id: int, play_event_id: int):
     students_list = request.json
 
     for student in students_list:
-        Query(StudentAssistance.SAVE_NEW_ASSISTANCE, play_id=play_id,
-              play_event_id=play_event_id, student_code=student)
+        asistance = Query(StudentAssistance.GET_ASSISTANCE, student_code=student,
+                          play_event_id=play_event_id, play_id=play_id).execute(FetchMode.ONE)
+
+        if not asistance:
+            Query(StudentAssistance.SAVE_NEW_ASSISTANCE, play_id=play_id,
+                  play_event_id=play_event_id, student_code=student).execute()
 
     return jsonify({"message": "Students assistance saved"})
 
