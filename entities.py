@@ -3,6 +3,7 @@ class Play:
         SELECT PLAY.*, pt.name as PLAY_TYPE, c.NAME as country from PLAY
         join PLAY_TYPE pt on PLAY.PLAY_TYPE_ID = pt.PLAY_TYPE_ID
         join COUNTRY c on PLAY.COUNTRY_CODE = c.CODE
+        where PLAY.STATE = :state
     """
 
     GET_PLAYS_BY_STUDENT_CONVOCATION = """
@@ -111,7 +112,29 @@ class Student:
         left join STUDENT_ASISTANCE SA on STUDENT.CODE = SA.STUDENT_CODE and SA.PLAY_ID = P.PLAY_ID and SA.PLAY_EVENT_ID = PE.PLAY_EVENT_ID
         where P.PLAY_ID = :play_id and PE.PLAY_EVENT_ID = :play_event_id
         group by STUDENT.CODE, STUDENT.NAMES, STUDENT.LAST_NAMES, PC.NAME
+    """
 
+    GET_STUDENTS_CERTIFICATE_INFO_BY_PLAY = """
+        select ST.CODE, ST.NAMES, ST.LAST_NAMES, ST.EMAIL, P.TITLE as PLAY_TITLE,
+        (select min(PE."date") from PLAY_EVENT PE
+            join STUDENT_ASISTANCE SA on PE.PLAY_EVENT_ID = SA.PLAY_EVENT_ID and PE.PLAY_ID = SA.PLAY_ID
+        where PE.PLAY_ID = P.PLAY_ID
+            and SA.STUDENT_CODE = ST.CODE) as START_DATE,
+        (select max(PE."date") from PLAY_EVENT PE
+            join STUDENT_ASISTANCE SA on PE.PLAY_EVENT_ID = SA.PLAY_EVENT_ID and PE.PLAY_ID = SA.PLAY_ID
+        where PE.PLAY_ID = P.PLAY_ID
+            and SA.STUDENT_CODE = ST.CODE) as END_DATE,
+            PC.NAME as CHARACTER
+        from STUDENT ST
+        join STUDENT_CHARACTER SC on ST.CODE = SC.STUDENT_CODE
+        join PLAY_CHARACTER PC on SC.CHARACTER_ID = PC.ID and SC.PLAY_ID = PC.PLAY_ID
+        join PLAY P on PC.PLAY_ID = P.PLAY_ID
+        where P.PLAY_ID = :play_id
+    """
+
+    GET_STUDENTS_CERTIFICATE_INFO_BY_PLAY_AND_CODE = f"""
+        {GET_STUDENTS_CERTIFICATE_INFO_BY_PLAY}
+        and ST.CODE in (:student_codes)
     """
 
 

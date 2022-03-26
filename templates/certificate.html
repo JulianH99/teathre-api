@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Certificado otorgado a {{ names }}</title>
+
+    <style>
+      * {
+        font-family: 'Open Sans', 'Roboto', 'Verdana', sans-serif;
+      }
+
+      body {
+        line-height: 1.5;
+      }
+
+      b {
+        background-color: #444;
+        color: #fff;
+        padding: 4px;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Certificado de participación</h1>
+      <hr />
+      <h2>La Universidad Distrital Francisco José de Caldas certifica que:</h2>
+
+      <p style="font-size: 19px">
+        El estudiante <b>{{ names }} {{ lastNames }}</b> con código
+        <b>{{ code }}</b> participó en la obra
+        <b>{{ playTitle }}</b> interpretando al personaje
+        <b>{{ character }}</b> desde la fecha <b>{{ startDate }}</b> hasta la
+        fecha <b>{{ endDate }}</b>
+      </p>
+    </main>
+  </body>
+</html>
