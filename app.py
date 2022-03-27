@@ -141,6 +141,14 @@ def generate_certificate(play_id: int):
     return jsonify({'message': 'Certificates generated successfuly'})
 
 
+@app.get('/student/<int:code>/plays')
+def get_plays_by_student(code: int):
+    plays = Query(Play.GET_PLAYS_BY_STUDENT,
+                  student_code=code).execute(FetchMode.ALL)
+
+    return jsonify(plays)
+
+
 def exit_handler():
     Globals.get('connection').close()
 

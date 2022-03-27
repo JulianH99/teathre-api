@@ -33,6 +33,14 @@ class Play:
         and EMPLOYEE.EMPLOYEE_ID = :employee_id
     """
 
+    GET_PLAYS_BY_STUDENT = """
+        select P.PLAY_ID, P.TITLE, PC.NAME as CHARACTER, S.CODE as STUDENT_CODE from PLAY P
+        join PLAY_CHARACTER PC on P.PLAY_ID = PC.PLAY_ID
+        join STUDENT_CHARACTER SC on PC.ID = SC.CHARACTER_ID and PC.PLAY_ID = SC.PLAY_ID
+        join STUDENT S on SC.STUDENT_CODE = S.CODE
+        where SC.STUDENT_CODE = :student_code
+    """
+
 
 class Character:
     GET_CHARACTERS = """select * from play_character where play_id = :play_id"""
