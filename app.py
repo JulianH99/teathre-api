@@ -164,10 +164,36 @@ def login_professor():
     if professor is not None:
         resp = make_response(
             jsonify({'message': 'OK', 'userId': professor['employeeId']}))
-        print(professor)
         return resp
     else:
         return jsonify({'message': 'error, Code is not valid'}), 400
+
+
+@app.get('/allowance/<int:play_id>/students')
+def get_allowance_students(play_id: int):
+    students = Query(Student.GET_STUDENTS_ALLOWANCE_BY_PLAY,
+                     play_id=play_id).execute(FetchMode.ALL)
+    res_students = []
+    codes = []
+    for student in students:
+        if not student['code'] in codes:
+            codes.append(student['code'])
+            temp = {
+                'code': student['code'],
+                'full_name': student['names'] + " " + student['lastNames'],
+                'asistance': []
+            }
+            for item in students:
+                if item['code'] == student['code']:
+                    temp['asistance'].append({
+                        'type': item['name'],
+                        'theater': item['theaterName'],
+                        'date': item['date'].strftime("%m/%d/%Y"),
+                        'start_time': item['startTime'].strftime("%H:%M:%S"),
+                        'end_time': item['endTime'].strftime("%H:%M:%S"),
+                    })
+            res_students.append(temp)
+    return jsonify(res_students)
 
 
 def exit_handler():

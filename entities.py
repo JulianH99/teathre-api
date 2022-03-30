@@ -146,6 +146,16 @@ class Student:
         and ST.CODE in (:student_codes)
     """
 
+    GET_STUDENTS_ALLOWANCE_BY_PLAY = """
+        SELECT S.NAMES, S.LAST_NAMES, S.CODE, PE."date", PE.START_TIME, PE.END_TIME, PET.NAME, T.NAME as theater_name from STUDENT S
+        join STUDENT_ASISTANCE SA on S.CODE = SA.STUDENT_CODE
+        join PLAY_EVENT PE on PE.PLAY_EVENT_ID = SA.PLAY_EVENT_ID and PE.PLAY_ID = SA.PLAY_ID
+        join PLAY_EVENT_TYPE PET on PET.PLAY_EVENT_TYPE_ID = PE.EVENT_TYPE
+        join THEATRE T on PE.THEATRE_ID = T.ID
+        join PLAY P on PE.PLAY_ID = P.PLAY_ID
+        where P.PLAY_ID = :play_id
+        """
+
 
 class Employee:
     GET_BY_DOCUMENT = """

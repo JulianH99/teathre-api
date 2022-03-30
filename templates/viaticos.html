@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Certificado otorgado a {{ names }}</title>
+
+    <style>
+      * {
+        font-family: 'Open Sans', 'Roboto', 'Verdana', sans-serif;
+      }
+
+      body {
+        line-height: 1.5;
+      }
+
+      b {
+        background-color: #444;
+        color: #fff;
+        padding: 4px;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Informe liquidacion de Viaticos para la obra XXXX desde XXXX hasta XXXX</h1>
+      <hr />
+      <h2>Respetada Decanatura de la Facultad de Artes a continuacion se presenta el informe la liquidacion de los viaticos de los estudiantes:</h2>
+
+      <p style="font-size: 19px">
+        El estudiante <b>{{ names }} {{ lastNames }}</b> con código
+        <b>{{ code }}</b> participó en la obra
+        <b>{{ playTitle }}</b> interpretando al personaje
+        <b>{{ character }}</b> desde la fecha <b>{{ startDate }}</b> hasta la
+        fecha <b>{{ endDate }}</b>
+      </p>
+
+        <h3>Firma: XXXX con Cedula de ciudadania XXXX</h3>
+    </main>
+  </body>
+</html>
