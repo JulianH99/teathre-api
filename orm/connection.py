@@ -1,6 +1,6 @@
 import cx_Oracle
 
-from .. import config
+import config
 
 
 class Connection:

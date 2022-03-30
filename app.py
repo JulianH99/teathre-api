@@ -7,14 +7,14 @@ from functools import wraps
 from flask import Flask, jsonify, make_response, request, render_template
 from flask_cors import CORS
 
-from .mail import send_mail
+from mail import send_mail
 
-from .entities import (Career, Character, Convocation, ConvocationApplicant, ConvocationDates,
-                       DocumentType, Person, Play, Student, StudentAssistance)
-from .orm.connection import Connection
-from .orm.globals import Globals
-from .orm.query import FetchMode, Query
-from .pdf import html_to_pdf
+from entities import (Career, Character, Convocation, ConvocationApplicant, ConvocationDates,
+                       DocumentType, Person, Play, Student, StudentAssistance, Employee)
+from orm.connection import Connection
+from orm.globals import Globals
+from orm.query import FetchMode, Query
+from pdf import html_to_pdf
 
 
 locale.setlocale(locale.LC_ALL, 'es_CO')
@@ -87,13 +87,14 @@ def save_students_assistance_to_play(play_id: int, play_event_id: int):
 
 @app.get('/play')
 def get_plays():
-    state = int(request.args.get('state'))
-    if state != 0 and state != 1:
-        state = 1
-
-    plays = Query(Play.GET_ALL_QUERY, state=state).execute(FetchMode.ALL)
-
+    plays = Query(Play.GET_ALL_QUERY).execute(FetchMode.ALL)
     return jsonify(plays)
+
+
+@app.get('/play/<int:play_id>')
+def get_play(play_id: int):
+    play = Query(Play.GET_BY_ID, id=play_id).execute(FetchMode.ALL)
+    return jsonify(play)
 
 
 @app.get('/play/<int:play_id>/students')
@@ -149,8 +150,24 @@ def get_plays_by_student(code: int):
     return jsonify(plays)
 
 
+@app.post('/login')
+def login_professor():
+    json_request = request.json
+    professor = Query(Employee.GET_BY_DOCUMENT, code=json_request['code']).execute(FetchMode.ONE)
+    if professor is not None:
+        resp = make_response(jsonify({'message': 'OK'}))
+        resp.set_cookie('X-User-Id', professor['employeeId'])
+        return resp
+    else:
+        return jsonify({'message': 'error, Code is not valid'}), 400
+
+
 def exit_handler():
     Globals.get('connection').close()
 
 
 atexit.register(exit_handler)
+
+
+if '__main__':
+    app.run()

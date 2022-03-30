@@ -3,7 +3,6 @@ class Play:
         SELECT PLAY.*, pt.name as PLAY_TYPE, c.NAME as country from PLAY
         join PLAY_TYPE pt on PLAY.PLAY_TYPE_ID = pt.PLAY_TYPE_ID
         join COUNTRY c on PLAY.COUNTRY_CODE = c.CODE
-        where PLAY.STATE = :state
     """
 
     GET_PLAYS_BY_STUDENT_CONVOCATION = """
@@ -143,6 +142,13 @@ class Student:
     GET_STUDENTS_CERTIFICATE_INFO_BY_PLAY_AND_CODE = f"""
         {GET_STUDENTS_CERTIFICATE_INFO_BY_PLAY}
         and ST.CODE in (:student_codes)
+    """
+
+
+class Employee:
+    GET_BY_DOCUMENT = """
+        SELECT E.EMPLOYEE_ID, NAMES, LAST_NAMES, ID_NUMBER, PHONE_NUMBER, EMAIL from EMPLOYEE E
+        where E.ID_NUMBER = :code
     """
 
 

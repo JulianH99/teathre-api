@@ -4,7 +4,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.encoders import encode_base64
 
-from .config import MAIL_HOST, MAIL_PORT, MAIL_PASS, MAIL_USER
+from config import MAIL_HOST, MAIL_PORT, MAIL_PASS, MAIL_USER
 
 
 def send_mail(to, subject, message, attachment_string=None):
