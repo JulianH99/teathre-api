@@ -3,6 +3,7 @@ class Play:
         SELECT PLAY.*, pt.name as PLAY_TYPE, c.NAME as country from PLAY
         join PLAY_TYPE pt on PLAY.PLAY_TYPE_ID = pt.PLAY_TYPE_ID
         join COUNTRY c on PLAY.COUNTRY_CODE = c.CODE
+        where PLAY.STATE = :state
     """
 
     GET_PLAYS_BY_STUDENT_CONVOCATION = """
@@ -30,6 +31,7 @@ class Play:
         and TO_CHAR(PE.END_TIME, 'HH24:MI:SS') >= TO_CHAR(sysdate, 'HH24:MI:SS')
         and TO_CHAR(PE."date", 'YYYY-MM-DD') = TO_CHAR(sysdate, 'YYYY-MM-DD')
         and EMPLOYEE.EMPLOYEE_ID = :employee_id
+        and P.PLAY_ID = :play_id
     """
 
     GET_PLAYS_BY_STUDENT = """

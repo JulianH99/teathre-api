@@ -4,13 +4,13 @@ from datetime import datetime
 import locale
 from functools import wraps
 
-from flask import Flask, jsonify, make_response, request, render_template
+from flask import Flask, jsonify, make_response, request, render_template, session
 from flask_cors import CORS
 
 from mail import send_mail
 
 from entities import (Career, Character, Convocation, ConvocationApplicant, ConvocationDates,
-                       DocumentType, Person, Play, Student, StudentAssistance, Employee)
+                      DocumentType, Person, Play, Student, StudentAssistance, Employee)
 from orm.connection import Connection
 from orm.globals import Globals
 from orm.query import FetchMode, Query
@@ -28,6 +28,8 @@ except Exception as ex:
 
 print("App ready")
 app = Flask(__name__)
+
+app.secret_key = 'QKW%Hb253qcpF_'
 cors = CORS(app)
 
 USER_ID_HEADER_NAME = 'X-User-Id'
@@ -45,13 +47,12 @@ def has_teacher_id_header(function):
     return decorated_function
 
 
-@app.get('/tab/assistance')
-@has_teacher_id_header
-def get_enabled_asistance_tab():
+@app.get('/tab/assistance/<int:play_id>')
+def get_enabled_asistance_tab(play_id: int):
     teacher_id = request.headers.get(USER_ID_HEADER_NAME)
 
     active_play = Query(Play.GET_ACTIVE_PLAY_BY_TEACHER,
-                        employee_id=teacher_id).execute(fetch=FetchMode.ONE)
+                        employee_id=teacher_id, play_id=play_id).execute(fetch=FetchMode.ONE)
 
     if not active_play:
         return jsonify({"active": False})
@@ -87,13 +88,18 @@ def save_students_assistance_to_play(play_id: int, play_event_id: int):
 
 @app.get('/play')
 def get_plays():
-    plays = Query(Play.GET_ALL_QUERY).execute(FetchMode.ALL)
+    state = int(request.args.get('state'))
+    if state != 0 and state != 1:
+        state = 1
+
+    plays = Query(Play.GET_ALL_QUERY, state=state).execute(FetchMode.ALL)
+
     return jsonify(plays)
 
 
 @app.get('/play/<int:play_id>')
 def get_play(play_id: int):
-    play = Query(Play.GET_BY_ID, id=play_id).execute(FetchMode.ALL)
+    play = Query(Play.GET_BY_ID, id=play_id).execute(FetchMode.ONE)
     return jsonify(play)
 
 
@@ -153,10 +159,12 @@ def get_plays_by_student(code: int):
 @app.post('/login')
 def login_professor():
     json_request = request.json
-    professor = Query(Employee.GET_BY_DOCUMENT, code=json_request['code']).execute(FetchMode.ONE)
+    professor = Query(Employee.GET_BY_DOCUMENT,
+                      code=json_request['code']).execute(FetchMode.ONE)
     if professor is not None:
-        resp = make_response(jsonify({'message': 'OK'}))
-        resp.set_cookie('X-User-Id', professor['employeeId'])
+        resp = make_response(
+            jsonify({'message': 'OK', 'userId': professor['employeeId']}))
+        print(professor)
         return resp
     else:
         return jsonify({'message': 'error, Code is not valid'}), 400
