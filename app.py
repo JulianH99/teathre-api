@@ -4,7 +4,7 @@ from datetime import datetime
 import locale
 from functools import wraps
 
-from flask import Flask, jsonify, make_response, request, render_template, session
+from flask import Flask, jsonify, make_response, request, render_template, session, send_file
 from flask_cors import CORS
 
 from mail import send_mail
@@ -92,7 +92,15 @@ def get_plays():
     if state != 0 and state != 1:
         state = 1
 
-    plays = Query(Play.GET_ALL_QUERY, state=state).execute(FetchMode.ALL)
+    plays = Query(Play.GET_ALL_QUERY_STATE, state=state).execute(FetchMode.ALL)
+
+    return jsonify(plays)
+
+
+@app.get('/plays')
+def get_plays_all():
+
+    plays = Query(Play.GET_ALL_QUERY).execute(FetchMode.ALL)
 
     return jsonify(plays)
 
@@ -194,6 +202,58 @@ def get_allowance_students(play_id: int):
                     })
             res_students.append(temp)
     return jsonify(res_students)
+
+
+@app.post('/allowance/<int:play_id>/report')
+def generate_report(play_id: int):
+    # if they choose wich students to send the certificate to
+    request_json = request.json
+
+    students_query = Query(Student.GET_STUDENTS_ALLOWANCE_BY_PLAY,
+                     play_id=play_id).execute(FetchMode.ALL)
+    students = []
+    codes = []
+    for student in students_query:
+        if not student['code'] in codes:
+            codes.append(student['code'])
+            temp = {
+                'code': student['code'],
+                'full_name': student['names'] + " " + student['lastNames'],
+                'asistance': []
+            }
+            for item in students_query:
+                if item['code'] == student['code']:
+                    temp['asistance'].append({
+                        'type': item['name'],
+                        'theater': item['theaterName'],
+                        'date': item['date'].strftime("%m/%d/%Y"),
+                        'start_time': item['startTime'].strftime("%H:%M:%S"),
+                        'end_time': item['endTime'].strftime("%H:%M:%S"),
+                    })
+            students.append(temp)
+
+    professor = Query(Employee.GET_BY_ID, id=request_json['professor_id']).execute(FetchMode.ONE)
+    play = Query(Play.GET_BY_ID, id=play_id).execute(FetchMode.ONE)
+
+    student_render = render_template('viaticos.html', professor=professor, students=students, play=play)
+    student_generated_pdf = html_to_pdf(student_render, True)
+    # response = make_response(student_generated_pdf)
+    # response.headers['Content-Type'] = 'application/pdf'
+    # response.headers['Content-Disposition'] = \
+    #     'inline; filename=%s.pdf' % 'report'
+
+    return jsonify({'message': 'Certificates generated successfuly'})
+
+
+@app.get('/tab/allowance/<int:play_id>')
+def get_enabled_allowance_tab(play_id: int):
+    active_play = Query(Play.GET_ACTIVE_PLAY_BY_EVENT,
+                        id=play_id).execute(fetch=FetchMode.ALL)
+
+    if active_play:
+        return jsonify({"active": False})
+
+    return jsonify({"active": True})
 
 
 def exit_handler():

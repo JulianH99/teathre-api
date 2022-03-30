@@ -25,19 +25,23 @@
   </head>
   <body>
     <main>
-      <h1>Informe liquidacion de Viaticos para la obra XXXX desde XXXX hasta XXXX</h1>
+      <h1>Informe liquidacion de Viaticos para la obra {{ play['title'] }} desde {{ play['playDate'].strftime("%m/%d/%Y") }} hasta {{ play['playDate'].strftime("%m/%d/%Y") }}</h1>
       <hr />
       <h2>Respetada Decanatura de la Facultad de Artes a continuacion se presenta el informe la liquidacion de los viaticos de los estudiantes:</h2>
-
+    {% for student in students %}
       <p style="font-size: 19px">
-        El estudiante <b>{{ names }} {{ lastNames }}</b> con código
-        <b>{{ code }}</b> participó en la obra
-        <b>{{ playTitle }}</b> interpretando al personaje
-        <b>{{ character }}</b> desde la fecha <b>{{ startDate }}</b> hasta la
-        fecha <b>{{ endDate }}</b>
+        El estudiante <b>{{ student['names'] }} {{ student['lastNames'] }}</b> con código
+        <b>{{ student['code'] }}</b> participó en la obra
+        <b>{{ play['title'] }}</b> interpretando al personaje
+        donde asistio a las fechas
+        <ul>
+            {% for item in student.asistance %}
+                <li>{{ item['date'] }} en horas {{ item['start_time'] }} - {{ item['end_time'] }} en el teatro {{ item['theater'] }} para un {{ item['type'] }}</li>
+            {% endfor %}
+        </ul>
       </p>
-
-        <h3>Firma: XXXX con Cedula de ciudadania XXXX</h3>
+    {% endfor %}
+        <h3>Firma: {{ professor['names'] +" "+ professor['lastNames'] }} con Cedula de ciudadania {{ professor['idNumber'] }}</h3>
     </main>
   </body>
 </html>
