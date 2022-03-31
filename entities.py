@@ -3,7 +3,6 @@ class Play:
             SELECT PLAY.*, pt.name as PLAY_TYPE, c.NAME as country from PLAY
             join PLAY_TYPE pt on PLAY.PLAY_TYPE_ID = pt.PLAY_TYPE_ID
             join COUNTRY c on PLAY.COUNTRY_CODE = c.CODE
-            where PLAY.STATE = :state
         """
 
     GET_ALL_QUERY_STATE = """
@@ -54,6 +53,14 @@ class Play:
         join PLAY_EVENT PE on P.PLAY_ID = PE.PLAY_ID
         where PE."date" > SYSDATE
         and P.PLAY_ID = :id
+    """
+
+    GET_PLAY_BY_TEACHER = """
+        SELECT PLAY.*, pt.name as PLAY_TYPE, c.NAME as country from PLAY
+        join PLAY_TYPE pt on PLAY.PLAY_TYPE_ID = pt.PLAY_TYPE_ID
+        join COUNTRY c on PLAY.COUNTRY_CODE = c.CODE
+        join PLAY_PARTICIPANT PP on PLAY.PLAY_ID = PP.PLAY_ID
+        where PP.EMPLOYEE_ID = :teacher_id
     """
 
 
@@ -181,6 +188,14 @@ class Employee:
             SELECT E.EMPLOYEE_ID, NAMES, LAST_NAMES, ID_NUMBER, PHONE_NUMBER, EMAIL from EMPLOYEE E
             where E.EMPLOYEE_ID = :id
         """
+
+    GET_PROFESSOR_BY_DOCUMENT = """
+        SELECT E.EMPLOYEE_ID, NAMES, LAST_NAMES, ID_NUMBER, PHONE_NUMBER, EMAIL from EMPLOYEE E
+        join PLAY_PARTICIPANT PP on E.EMPLOYEE_ID = PP.EMPLOYEE_ID and E.UNIT_ID = PP.UNIT_ID
+        join ROLE R on R.ROL_ID = PP.ROL_ID
+        where E.ID_NUMBER = :code
+        and R.ROL_ID = 1
+    """
 
 
 class DocumentType:

@@ -98,10 +98,10 @@ def get_plays():
 
 
 @app.get('/plays')
+@has_teacher_id_header
 def get_plays_all():
-
-    plays = Query(Play.GET_ALL_QUERY).execute(FetchMode.ALL)
-
+    teacher_id = request.headers.get(USER_ID_HEADER_NAME)
+    plays = Query(Play.GET_PLAY_BY_TEACHER, teacher_id=teacher_id).execute(FetchMode.ALL)
     return jsonify(plays)
 
 
@@ -167,8 +167,7 @@ def get_plays_by_student(code: int):
 @app.post('/login')
 def login_professor():
     json_request = request.json
-    professor = Query(Employee.GET_BY_DOCUMENT,
-                      code=json_request['code']).execute(FetchMode.ONE)
+    professor = Query(Employee.GET_PROFESSOR_BY_DOCUMENT, code=json_request['code']).execute(FetchMode.ONE)
     if professor is not None:
         resp = make_response(
             jsonify({'message': 'OK', 'userId': professor['employeeId']}))
